@@ -21,9 +21,9 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Implementation
             _modelTestClassFactory = modelTestClassFactory;
         }
 
-        public Task InitializeAllAsync(string filePath)
+        public Task InitializeAllAsync(string folderPath)
         {
-            var csharpFiles = _fileSystem.Directory.GetFiles(filePath, "*.cs").ToList();
+            var csharpFiles = _fileSystem.Directory.GetFiles(folderPath, "*.cs").ToList();
 
             foreach (var file in csharpFiles)
             {

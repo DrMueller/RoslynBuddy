@@ -21,6 +21,8 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
             var tree = CSharpSyntaxTree.ParseText(fileContent);
             var root = tree.GetRoot();
 
+            var ns = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
+
             var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
             var className = classDeclaration.Identifier.Text;
 
@@ -36,7 +38,7 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
                     return new Constructor(ctorParams);
                 }).ToList();
 
-            return new ModelClassInfo(className, ctors);
+            return new ModelClassInfo(className, string.Empty, ctors);
         }
     }
 }

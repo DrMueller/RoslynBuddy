@@ -61,12 +61,12 @@ namespace Mmu.Rb.WpfUI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap M {
+        internal static System.Drawing.Icon M {
             get {
                 object obj = ResourceManager.GetObject("M", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
     }
