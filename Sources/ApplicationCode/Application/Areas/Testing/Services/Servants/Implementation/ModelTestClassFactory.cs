@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mmu.Rb.Application.Areas.Testing.Models;
@@ -7,9 +9,9 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
 {
     internal class ModelTestClassFactory : IModelTestClassFactory
     {
-        public ModelTestClass Create(ModelClassInfo modelClassInfo)
+        public ModelTestClass Create(ModelClassInfo modelClassInfo, string testAssemblyBaseNamespace)
         {
-            var ns = CreateNamespace();
+            var ns = CreateNamespace(modelClassInfo.NamespaceDecl, testAssemblyBaseNamespace);
             var cd = InitializeClass(modelClassInfo.ClassName);
             cd = AppendSutField(cd, modelClassInfo.ClassName);
             cd = AppendSetUpMethod(cd, modelClassInfo.ClassName);
@@ -30,14 +32,15 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
                 @"ConstructorTestBuilderFactory.Constructing<FortrasOrder>()
                 .UsingDefaultConstructor();");
 
-            return cd.AddMembers(
-                    SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Constructor_Works")
-                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                        .WithBody(SyntaxFactory.Block(statement1)))
+            var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Constructor_Works")
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                .WithBody(SyntaxFactory.Block(statement1))
                 .AddAttributeLists(
                     SyntaxFactory.AttributeList(
                         SyntaxFactory.SingletonSeparatedList(
                             SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")))));
+
+            return cd.AddMembers(method);
         }
 
         private static ClassDeclarationSyntax AppendSetUpMethod(ClassDeclarationSyntax cd, string classTypeName)
@@ -62,13 +65,35 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
 
             var sutField = SyntaxFactory.FieldDeclaration(variableDeclaration)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+
             return cd.AddMembers(sutField);
         }
 
-        private static NamespaceDeclarationSyntax CreateNamespace()
+        private static NamespaceDeclarationSyntax CreateNamespace(string modelNamespace, string testAssemblyBaseNamespace)
         {
-            const string DefaultNamespace = "TODO";
-            var ns = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(DefaultNamespace)).NormalizeWhitespace();
+            var splittedTestNamespace = testAssemblyBaseNamespace.Split('.').ToList();
+            var splittedModelNamespace = modelNamespace.Split('.').ToList();
+
+            var newRelativeNamespace = splittedModelNamespace.ToList();
+
+            for (var i = splittedModelNamespace.Count - 1; i >= 0; i--)
+            {
+                var testNamespacePart = splittedTestNamespace.ElementAtOrDefault(i);
+                var modelNamespacePart = splittedModelNamespace.ElementAtOrDefault(i);
+
+                if (string.IsNullOrEmpty(testNamespacePart) || string.IsNullOrEmpty(modelNamespacePart))
+                {
+                    continue;
+                }
+
+                if (string.Equals(testNamespacePart, modelNamespacePart, StringComparison.OrdinalIgnoreCase))
+                {
+                    newRelativeNamespace.RemoveAt(i);
+                }
+            }
+
+            var newNamespace = testAssemblyBaseNamespace + "." + string.Join(".", newRelativeNamespace);
+            var ns = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(newNamespace)).NormalizeWhitespace();
             ns = ns.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
             return ns;
         }

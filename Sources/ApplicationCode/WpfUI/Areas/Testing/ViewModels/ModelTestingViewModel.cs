@@ -13,13 +13,14 @@ namespace Mmu.Rb.WpfUI.Areas.Testing.ViewModels
         public string HeadingText { get; } = "Model Testing";
         public string NavigationDescription { get; } = "Model Testing";
         public int NavigationSequence { get; } = 1;
-        public string FilePath { get; set; }
-        public ViewModelCommand SelectFilePath => _commandsContainer.SelectFilePath;
+        public string FolderPath { get; set; }
+        public string TestAssemblyBaseNamespce { get; set; }
+        public ViewModelCommand SelectFolderPath => _commandsContainer.SelectFolderPath;
 
         public ModelTestingViewModel(ModelTestingViewModelCommands commandsContainer)
         {
             _commandsContainer = commandsContainer;
-            FilePath = @"C:\Users\matthias.mueller\Desktop\Test";
+            FolderPath = @"C:\Users\matthias.mueller\Desktop\Test";
         }
 
         public async Task InitializeAsync()

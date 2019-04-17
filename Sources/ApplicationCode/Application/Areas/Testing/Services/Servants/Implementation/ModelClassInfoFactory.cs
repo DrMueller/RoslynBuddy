@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mmu.Mlh.LanguageExtensions.Areas.Types.FunctionsResults;
 using Mmu.Rb.Application.Areas.Testing.Models;
 
 namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
@@ -15,15 +16,24 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
             _fileSystem = fileSystem;
         }
 
-        public ModelClassInfo CreateFromFile(string filePath)
+        public FunctionResult<ModelClassInfo> TryCreatingFromFile(string filePath)
         {
             var fileContent = _fileSystem.File.ReadAllText(filePath);
             var tree = CSharpSyntaxTree.ParseText(fileContent);
             var root = tree.GetRoot();
 
-            var ns = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
+            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
 
-            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+            if (classDeclaration == null)
+            {
+                return FunctionResult.CreateFailure<ModelClassInfo>();
+            }
+
+            var fullNamespace = root
+                .DescendantNodes()
+                .OfType<NamespaceDeclarationSyntax>().First()
+                .Name
+                .ToString();
             var className = classDeclaration.Identifier.Text;
 
             var ctorDeclarations = root.DescendantNodes().OfType<ConstructorDeclarationSyntax>();
@@ -38,7 +48,8 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
                     return new Constructor(ctorParams);
                 }).ToList();
 
-            return new ModelClassInfo(className, string.Empty, ctors);
+            var classInfo = new ModelClassInfo(className, fullNamespace, ctors);
+            return FunctionResult.CreateSuccess(classInfo);
         }
     }
 }

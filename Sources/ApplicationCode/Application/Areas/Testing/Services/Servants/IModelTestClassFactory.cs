@@ -4,6 +4,6 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants
 {
     public interface IModelTestClassFactory
     {
-        ModelTestClass Create(ModelClassInfo modelClassInfo);
+        ModelTestClass Create(ModelClassInfo modelClassInfo, string testAssemblyBaseNamespace);
     }
 }

@@ -25,25 +25,43 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
             </Grid.RowDefinitions>
 
             <Label
+                Grid.Row="0"
                 Grid.Column="0"
                 Content="Folder:"
-                Target="{Binding ElementName=TxtFilePath}" />
+                Target="{Binding ElementName=TxtFolderPath}" />
 
             <TextBox
+                Grid.Row="0"
                 Grid.Column="1"
-                x:Name="TxtFilePath"
-                Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                x:Name="TxtFolderPath"
+                Text="{Binding FolderPath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
 
             <Button
+                Grid.Row="0"
                 Grid.Column="2"
                 Width="80"
                 Content="{Binding Description, Mode=OneWay}"
                 Command="{Binding Command, Mode=OneWay}"
-                DataContext="{Binding SelectFilePath, Mode=OneWay}"
+                DataContext="{Binding SelectFolderPath, Mode=OneWay}"
                 Margin="10,0,0,0" />
+
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                Content="Test Base Namespace:"
+                Target="{Binding ElementName=TxtTestNamespace}" />
+
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                x:Name="TxtTestNamespace"
+                Text="{Binding TestAssemblyBaseNamespce, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+
         </Grid>
     </Grid>
 </UserControl>

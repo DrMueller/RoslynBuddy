@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
+using Mmu.Rb.Application.Areas.Testing.Models;
 using Mmu.Rb.Application.Areas.Testing.Services.Servants;
 
 namespace Mmu.Rb.Application.Areas.Testing.Services.Implementation
@@ -21,17 +22,22 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Implementation
             _modelTestClassFactory = modelTestClassFactory;
         }
 
-        public Task InitializeAllAsync(string folderPath)
+        public Task InitializeAllAsync(ModelInitializationParameters initParams)
         {
-            var csharpFiles = _fileSystem.Directory.GetFiles(folderPath, "*.cs").ToList();
+            var csharpFilePaths = _fileSystem.Directory.GetFiles(initParams.FolderPath, "*.cs").ToList();
 
-            foreach (var file in csharpFiles)
+            var generatedDirectory = _fileSystem.Path.Combine(initParams.FolderPath, "Generated");
+            _fileSystem.Directory.CreateDirectory(generatedDirectory);
+
+            foreach (var filePath in csharpFilePaths)
             {
-                var modelClassInfo = _modelClassInfoFactory.CreateFromFile(file);
-                var testClass = _modelTestClassFactory.Create(modelClassInfo);
-                var fileName = _fileSystem.Path.GetFileName(file);
-                var fullTestPath = file.Replace(fileName, testClass.FileName);
-                _fileSystem.File.WriteAllText(fullTestPath, testClass.FileContent);
+                var modelClassInfoResult = _modelClassInfoFactory.TryCreatingFromFile(filePath);
+                if (modelClassInfoResult.IsSuccess)
+                {
+                    var testClass = _modelTestClassFactory.Create(modelClassInfoResult.Value, initParams.TestAssemblyBaseNamespace);
+                    var fullTestPath = _fileSystem.Path.Combine(generatedDirectory, testClass.FileName);
+                    _fileSystem.File.WriteAllText(fullTestPath, testClass.FileContent);
+                }
             }
 
             return Task.CompletedTask;

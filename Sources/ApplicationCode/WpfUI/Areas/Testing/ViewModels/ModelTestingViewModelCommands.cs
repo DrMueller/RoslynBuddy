@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Mmu.Mlh.WpfExtensions.Areas.MvvmShell.Commands;
 using Mmu.Mlh.WpfExtensions.Areas.ViewExtensions.Components.CommandBars.ViewData;
 using Mmu.Mlh.WpfExtensions.Areas.ViewExtensions.Dialogs.FolderDialogs.Services;
+using Mmu.Rb.Application.Areas.Testing.Models;
 using Mmu.Rb.Application.Areas.Testing.Services;
 
 namespace Mmu.Rb.WpfUI.Areas.Testing.ViewModels
@@ -14,7 +15,7 @@ namespace Mmu.Rb.WpfUI.Areas.Testing.ViewModels
         private ModelTestingViewModel _context;
         public CommandsViewData Commands { get; private set; }
 
-        public ViewModelCommand SelectFilePath
+        public ViewModelCommand SelectFolderPath
         {
             get
             {
@@ -26,7 +27,7 @@ namespace Mmu.Rb.WpfUI.Areas.Testing.ViewModels
                             var selectedPathResult = _folderDialogService.SelectFolder();
                             if (selectedPathResult.OkClicked)
                             {
-                                _context.FilePath = selectedPathResult.FolderPath;
+                                _context.FolderPath = selectedPathResult.FolderPath;
                             }
                         }));
             }
@@ -55,9 +56,10 @@ namespace Mmu.Rb.WpfUI.Areas.Testing.ViewModels
                                 new RelayCommand(
                                     async () =>
                                     {
-                                        await _modelTestInitializationService.InitializeAllAsync(context.FilePath);
+                                        var initParams = new ModelInitializationParameters(context.FolderPath, context.TestAssemblyBaseNamespce);
+                                        await _modelTestInitializationService.InitializeAllAsync(initParams);
                                     },
-                                    () => !string.IsNullOrEmpty(context.FilePath)))
+                                    () => !string.IsNullOrEmpty(context.FolderPath) && !string.IsNullOrEmpty(context.TestAssemblyBaseNamespce)))
                         });
                 });
         }

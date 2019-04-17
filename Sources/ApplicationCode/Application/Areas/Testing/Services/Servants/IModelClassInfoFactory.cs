@@ -1,9 +1,10 @@
-﻿using Mmu.Rb.Application.Areas.Testing.Models;
+﻿using Mmu.Mlh.LanguageExtensions.Areas.Types.FunctionsResults;
+using Mmu.Rb.Application.Areas.Testing.Models;
 
 namespace Mmu.Rb.Application.Areas.Testing.Services.Servants
 {
     public interface IModelClassInfoFactory
     {
-        ModelClassInfo CreateFromFile(string filePath);
+        FunctionResult<ModelClassInfo> TryCreatingFromFile(string filePath);
     }
 }
