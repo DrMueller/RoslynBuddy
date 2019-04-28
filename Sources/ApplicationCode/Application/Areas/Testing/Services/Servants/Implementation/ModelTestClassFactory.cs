@@ -15,7 +15,7 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
             var cd = InitializeClass(modelClassInfo.ClassName);
             cd = AppendSutField(cd, modelClassInfo.ClassName);
             cd = AppendSetUpMethod(cd, modelClassInfo.ClassName);
-            cd = AppendConstructorTestMethod(cd);
+            cd = AppendConstructorTestMethod(cd, modelClassInfo.ClassName);
             ns = ns.AddMembers(cd);
 
             var fileContent = ns
@@ -26,11 +26,10 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
             return new ModelTestClass(testFileName, fileContent);
         }
 
-        private static ClassDeclarationSyntax AppendConstructorTestMethod(ClassDeclarationSyntax cd)
+        private static ClassDeclarationSyntax AppendConstructorTestMethod(ClassDeclarationSyntax cd, string classTypeName)
         {
             var statement1 = SyntaxFactory.ParseStatement(
-                @"ConstructorTestBuilderFactory.Constructing<FortrasOrder>()
-                .UsingDefaultConstructor();");
+                $"ConstructorTestBuilderFactory.Constructing<{classTypeName}>().UsingDefaultConstructor();");
 
             var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Constructor_Works")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
@@ -95,6 +94,7 @@ namespace Mmu.Rb.Application.Areas.Testing.Services.Servants.Implementation
             var newNamespace = testAssemblyBaseNamespace + "." + string.Join(".", newRelativeNamespace);
             var ns = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(newNamespace)).NormalizeWhitespace();
             ns = ns.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
+            ns = ns.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NUnit.Framework")));
             return ns;
         }
 
